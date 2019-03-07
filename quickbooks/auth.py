@@ -20,10 +20,13 @@ except ImportError:
     print("http://rauth.readthedocs.org/en/latest/\n")
     raise
 
-SCOPE = (
-    ('com.intuit.quickbooks.accounting', 'ACCOUNTING',),
-    ('com.intuit.quickbooks.payment', 'PAYMENT',),
-)
+
+ACCOUNTING = 'accounting'
+PAYMENTS = 'payments'
+SCOPE = {
+    ACCOUNTING: 'com.intuit.quickbooks.accounting',
+    PAYMENTS: 'com.intuit.quickbooks.payment',
+}
 
 
 class AuthSessionManager(object):
@@ -151,6 +154,7 @@ class Oauth2SessionManager(AuthSessionManager):
     base_url = ''
 
     client_id = ''
+    scope = ''
     client_secret = ''
     x_refresh_token_expires_in = 0
     access_token = ''
@@ -174,6 +178,9 @@ class Oauth2SessionManager(AuthSessionManager):
 
         if 'refresh_token' in kwargs:
             self.refresh_token = kwargs['refresh_token']
+
+        if 'scope' in kwargs:
+            self.scope = SCOPE.get(kwargs['scope'])
 
     def start_session(self):
         if not self.started:
@@ -213,7 +220,7 @@ class Oauth2SessionManager(AuthSessionManager):
         params = {
             'client_id': self.client_id,
             'response_type': 'code',
-            'scope': 'com.intuit.quickbooks.accounting',
+            'scope': self.scope,
             'redirect_uri': callback_url,
             'state': state,
         }
